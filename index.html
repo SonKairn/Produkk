@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SonnOfficial | Payment & Katalog</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+  <!-- Material Symbols DIHAPUS karena diganti SVG, hanya tersisa untuk ikon lain (whatsapp/upload) -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+  <style>
+    /* VARS DENGAN TEMA DARK MINIMALIS */
+    :root {
+      --bg-primary: #121212;
+      --bg-secondary: rgba(25, 25, 25, 0.95);
+      --text-primary: #f0f0f0;
+      --text-secondary: #a0a0a0;
+      --accent: #FF3366; /* Merah Muda/Fuchsia */
+      --accent-glow: #ff668a;
+      --card-bg: rgba(30, 30, 30, 0.9);
+      --border-color: rgba(60, 60, 60, 0.4);
+      --shadow-dark: 0 4px 10px rgba(0, 0, 0, 0.4);
+      --qris-bg: #2ecc71; /* Hijau QRIS */
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      overflow-x: hidden;
+      transition: all .5s ease;
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* particles.js: Container untuk Background Efek Bintang */
+    #particles-js {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1; /* Posisikan di bawah konten utama */
+        background: var(--bg-primary);
+    }
+
+    /* UTILITY & LAYOUT */
+    .container {
+      position: relative;
+      z-index: 10; 
+
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .page {
+      width: 100%;
+      max-width: 700px;
+      padding: 20px;
+      border-radius: 12px;
+      background: var(--bg-secondary);
+      box-shadow: var(--shadow-dark);
+      margin: 10px;
+      display: none;
+      opacity: 0;
+      transform: translateY(15px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      position: relative;
+    }
+    .page.active { 
+        display: block; 
+        opacity: 1; 
+        transform: translateY(0);
+    }
+    
+    /* NOTIFIKASI */
+    .notif {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #333;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: .9rem;
+      z-index: 3000;
+      opacity: 0;
+      transition: transform .4s ease, opacity .4s ease;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+      white-space: nowrap;
+      will-change: transform, opacity;
+    }
+    .notif.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* TOMBOL KEMBALI (Sekarang menggunakan SVG) */
+    .back-btn {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: var(--text-primary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 8px 12px;
+      border-radius: 8px;
+      transition: background .3s ease, transform .3s ease;
+      z-index: 10;
+      /* will-change ini KRITIS untuk performa back arrow */
+      will-change: transform, background; 
+    }
+    .back-btn:hover {
+        background: var(--accent);
+        transform: scale(1.05); 
+    }
+    /* Style untuk SVG Ikon */
+    .back-btn svg {
+        margin-top: -2px; /* Penyesuaian vertikal */
+        will-change: transform;
+    }
+    
+    /* HOME PAGE */
+    #homePage {
+      text-align: center;
+      padding: 50px 20px;
+    }
+    .profile-icon {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 20px;
+      border-radius: 50%;
+      border: 3px solid var(--accent);
+      overflow: hidden;
+      box-shadow: var(--shadow-dark), 0 0 10px rgba(255, 51, 102, 0.4);
+    }
+    /* Menggunakan placeholder dengan warna tema */
+    .profile-icon img { width: 100%; height: 100%; object-fit: cover; }
+    h1 {
+      font-size: clamp(2.2rem, 8vw, 3.2rem);
+      font-weight: 900;
+      margin-bottom: 8px;
+    }
+    .description {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      margin-bottom: 30px;
+    }
+    .cta-button {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 14px 40px;
+      font-size: 1rem;
+      font-weight: 700;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all .3s ease;
+      box-shadow: var(--shadow-dark);
+    }
+    .cta-button:hover {
+      background: var(--accent-glow);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(255, 51, 102, 0.4);
+    }
+
+    /* KATALOG PAGE, PAYMENT PAGE, etc. styles remain the same for consistency */
+    #catalogPage { padding-top: 50px; }
+    #catalogPage h2 { text-align: center; font-size: 2rem; margin-bottom: 30px; color: var(--accent-glow); }
+    .product-list { display: grid; gap: 20px; }
+    .product-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 15px; display: flex; justify-content: space-between; align-items: center; transition: transform .2s ease; }
+    .product-card:hover { transform: scale(1.02); border-color: var(--accent); }
+    .product-info h3 { font-size: 1.2rem; font-weight: 800; color: var(--text-primary); }
+    .product-info p { font-size: 0.9rem; color: var(--text-secondary); }
+    .buy-btn { background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 20px; font-weight: 700; cursor: pointer; transition: background .3s ease; }
+    .buy-btn:hover { background: var(--accent-glow); }
+    #paymentPage { padding-top: 50px; }
+    .payment-header { text-align: center; margin-bottom: 20px; }
+    .payment-header h2 { font-size: 1.8rem; }
+    #selectedProduct { background: var(--accent); color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-weight: 700; text-align: center; }
+    .payment-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+    .payment-card-mini { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 15px; text-align: center; }
+    .payment-card-mini .payment-name { font-size: 1.1rem; font-weight: 800; color: var(--accent-glow); }
+    .payment-card-mini .payment-number { font-size: 0.95rem; margin: 5px 0; }
+    .copy-btn-small { background: rgba(255, 255, 255, 0.1); color: var(--text-primary); border: none; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-weight: 600; font-size: 0.8rem; margin-top: 5px; transition: background .2s ease; }
+    .copy-btn-small:hover { background: var(--accent); }
+    .copy-btn-small.copied { background: #10b981; }
+    .qris-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 15px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px solid var(--qris-bg); box-shadow: 0 0 10px rgba(46, 204, 113, 0.5); }
+    .qris-preview { width: 80px; height: 80px; background: white; margin: 5px auto 10px; border-radius: 5px; overflow: hidden; cursor: pointer; }
+    .qris-preview img { width: 100%; height: 100%; object-fit: cover; }
+    .proof-section { margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border-color); }
+    .proof-section h3 { text-align: center; margin-bottom: 20px; color: var(--text-primary); font-size: 1.5rem; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 5px; font-weight: 600; color: var(--text-primary); }
+    .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--card-bg); color: var(--text-primary); }
+    .file-upload-label { display: block; padding: 12px; border: 2px dashed var(--border-color); border-radius: 6px; text-align: center; cursor: pointer; transition: border-color .3s ease; }
+    .file-upload-label:hover { border-color: var(--accent); }
+    .file-upload input[type=file] { display: none; }
+    .submit-btn-proof { background: #25D366; color: white; border: none; padding: 12px 20px; font-size: 1rem; font-weight: 700; border-radius: 25px; cursor: pointer; transition: all .3s ease; width: 100%; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .submit-btn-proof:hover { background: #128C7E; transform: translateY(-2px); }
+    .preview-image { max-width: 100%; height: auto; margin-top: 10px; border-radius: 6px; }
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.9); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(5px); opacity: 0; transition: opacity 0.3s ease; }
+    .modal.active { display: flex; opacity: 1; }
+    .modal-content { background: white; padding: 30px; border-radius: 15px; text-align: center; position: relative; box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); }
+    .modal-close { position: absolute; top: 10px; right: 15px; font-size: 28px; cursor: pointer; color: #333; font-weight: 900; }
+    .enlarged-qris { width: 300px; height: 300px; margin: 20px auto; border: 5px solid var(--qris-bg); border-radius: 10px; }
+    .enlarged-qris img { width: 100%; height: 100%; object-fit: cover; }
+    @media (max-width: 600px) { .payment-grid { grid-template-columns: 1fr; } .enlarged-qris { width: 80vw; height: 80vw; max-width: 300px; max-height: 300px; } }
+  </style>
+</head>
+<body>
+  <!-- PARTICLE BACKGROUND CONTAINER (Z-index 1) -->
+  <div id="particles-js"></div>
+
+  <!-- Notifikasi -->
+  <div class="notif" id="notif"></div>
+
+  <!-- Container (Z-index 10) -->
+  <div class="container">
+    <!-- Halaman 1: HOME -->
+    <div class="page active" id="homePage">
+      <!-- FOTO PROFIL (Gunakan Placeholder Beratmosfer) -->
+      <div class="profile-icon">
+        <img src="https://placehold.co/120x120/FF3366/FFFFFF?text=SONN" alt="SonnOfficial">
+      </div>
+      <h1>SonnOfficial</h1>
+      <p class="description">
+        Selamat datang! Jelajahi katalog produk digital saya dan lakukan pembayaran dengan mudah.
+      </p>
+      <button class="cta-button" onclick="goToCatalog()">Lanjut</button>
+    </div>
+
+    <!-- Halaman 2: KATALOG PRODUK -->
+    <div class="page" id="catalogPage">
+        <!-- Ikon diganti dengan Inline SVG agar 100% lancar tanpa lag -->
+        <button class="back-btn" onclick="goToHome()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            Home
+        </button>
+        <h2>Katalog Produk</h2>
+        
+        <div class="product-list" id="productList">
+            <!-- Data Produk akan diisi oleh JavaScript -->
+        </div>
+    </div>
+
+    <!-- Halaman 3: PAYMENT & BUKTI TF -->
+    <div class="page" id="paymentPage">
+        <!-- Ikon diganti dengan Inline SVG agar 100% lancar tanpa lag -->
+        <button class="back-btn" onclick="goToCatalog()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            Katalog
+        </button>
+        <div class="payment-header">
+            <h2>Detail Pembayaran</h2>
+            <p style="color: var(--accent-glow);">Produk yang Anda pilih:</p>
+            <div id="selectedProduct"></div>
+        </div>
+
+        <!-- Detail Metode Pembayaran -->
+        <div class="payment-grid">
+            <!-- DANA -->
+            <div class="payment-card-mini">
+              <div class="payment-name">DANA</div>
+              <div class="payment-number" id="danaNumber">083137743419</div>
+              <div class="payment-owner" style="margin-bottom: 5px;">A/n Tanginihl</div>
+              <button class="copy-btn-small" onclick="copyToClipboard('083137743419', this)">Salin Nomor</button>
+            </div>
+
+            <!-- GOPAY -->
+            <div class="payment-card-mini">
+              <div class="payment-name">GOPAY</div>
+              <div class="payment-number" id="gopayNumber">083137743419</div>
+              <div class="payment-owner" style="margin-bottom: 5px;">A/n Tanginih</div>
+              <button class="copy-btn-small" onclick="copyToClipboard('083137743419', this)">Salin Nomor</button>
+            </div>
+
+            <!-- QRIS -->
+            <div class="qris-card">
+              <div class="payment-name">QRIS</div>
+              <div class="qris-preview" onclick="enlargeQRIS()">
+                <!-- QRIS Placeholder sudah dioptimalkan warnanya -->
+                <img src="https://placehold.co/80x80/2ecc71/121212?text=QRIS" alt="QRIS Code" id="qrisSmallImage">
+              </div>
+              <button class="copy-btn-small" onclick="enlargeQRIS()">Lihat & Scan</button>
+            </div>
+        </div>
+
+        <!-- FORM BUKTI TRANSFER -->
+        <div class="proof-section">
+            <h3 style="color: #25D366;">Kirim Bukti Transfer</h3>
+            <form id="proofForm" onsubmit="submitProof(event)">
+                <input type="hidden" id="formProductName" name="productName">
+                <input type="hidden" id="formProductPrice" name="productPrice">
+
+                <div class="form-group">
+                    <label for="nama">Nama Anda</label>
+                    <input type="text" id="nama" name="nama" required placeholder="Contoh: Sonn-Official">
+                </div>
+
+                <div class="form-group">
+                    <label for="metode">Metode Pembayaran</label>
+                    <input type="text" id="metode" name="metode" required placeholder="Contoh: QRIS, Transfer Dana">
+                </div>
+
+                <div class="form-group file-upload">
+                    <label for="bukti" id="buktiLabel">Foto Bukti Transfer</label>
+                    <input type="file" id="bukti" name="bukti" accept="image/*" required onchange="previewImage(event)">
+                    <label class="file-upload-label" for="bukti">
+                      <span class="material-symbols-outlined">upload_file</span>
+                      <span id="fileName">Pilih File Bukti (JPG/PNG)</span>
+                    </label>
+                    <div id="imagePreview"></div>
+                </div>
+
+                <button type="submit" class="submit-btn-proof" id="submitBtn">
+                    <span class="material-symbols-outlined">whatsapp</span> Konfirmasi via WhatsApp
+                </button>
+            </form>
+        </div>
+    </div>
+  </div>
+
+  <!-- QRIS Modal -->
+  <div class="modal" id="qrisModal">
+    <div class="modal-content">
+      <span class="modal-close" onclick="closeModal()">&times;</span>
+      <h2>QRIS Pembayaran</h2>
+      <p style="color: #333; margin-bottom: 15px; font-weight: 600;">Scan QR Code di bawah ini</p>
+      <div class="enlarged-qris">
+        <!-- QRIS Placeholder sudah dioptimalkan warnanya -->
+        <img src="https://placehold.co/300x300/2ecc71/121212?text=QRIS+CODE" alt="QRIS Code" id="qrisLargeImage">
+      </div>
+      <button class="cta-button" style="background: var(--qris-bg); color: white;" onclick="downloadQRIS()">Download QRIS</button>
+    </div>
+  </div>
+
+  <!-- particles.js library -->
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+
+  <script>
+    // --- KONFIGURASI ---
+    const WHATSAPP_NUMBER = '6283159696918'; // GANTI dengan nomor WhatsApp Anda
+    // GANTI dengan LINK QRIS ASLI Anda. Pastikan gambar di-compress!
+    const QRIS_IMAGE_URL = 'https://files.catbox.moe/qgnarl.png'; 
+    // GANTI dengan LINK Foto Profil ASLI Anda. Pastikan gambar di-compress!
+    const PROFILE_IMAGE_URL = 'https://files.catbox.moe/d1h1h6.png';
+    
+    const PRODUCTS = [
+        { id: '1', name: 'Panel Pterodactyl Unli', price: 'Rp 5.000', description: 'Panel Unli Anti Intip intip.' },
+        { id: '2', name: 'Sc Stellar', price: 'Rp 25.000', description: 'Sc Bug Stellar ' },
+        { id: '3', name: 'Jasa Desain Logo', price: 'Rp 5.000', description: 'Jasa pembuatan desain logo .' },
+        { id: '4', name: 'Donasi Bebas', price: 'Nominal Bebas', description: 'Dukungan untuk pengembangan konten dan proyek selanjutnya.' }
+    ];
+    let selectedProduct = null;
+    
+    // Set URL Gambar ke elemen
+    document.querySelector('.profile-icon img').src = PROFILE_IMAGE_URL;
+    document.getElementById('qrisSmallImage').src = QRIS_IMAGE_URL;
+    document.getElementById('qrisLargeImage').src = QRIS_IMAGE_URL;
+
+
+    // --- FUNGSI PARTICLE.JS ---
+    function initParticles() {
+        particlesJS('particles-js', {
+          particles: {
+            number: { value: 80, density: { enable: true, value_area: 800 } },
+            color: { value: '#a0a0a0' }, /* Warna abu-abu halus */
+            shape: { type: 'circle' },
+            opacity: { value: 0.3, random: true, anim: { enable: true, speed: 1, opacity_min: 0.1, sync: false } },
+            size: { value: 2, random: true },
+            line_linked: { enable: true, distance: 150, color: '#444444', opacity: 0.3, width: 1 }, /* Garis tipis dan gelap */
+            move: { enable: true, speed: 1.5, direction: 'none', random: true, straight: false, out_mode: 'out', bounce: false }
+          },
+          interactivity: {
+            detect_on: 'canvas',
+            events: {
+              onhover: { enable: true, mode: 'repulse' },
+              onclick: { enable: true, mode: 'push' },
+              resize: true
+            },
+            modes: {
+              repulse: { distance: 100, duration: 0.4 },
+              push: { particles_nb: 4 }
+            }
+          },
+          retina_detect: true
+        });
+    }
+
+    // --- FUNGSI NOTIFIKASI ---
+    function showNotif(msg) {
+      const n = document.getElementById('notif');
+      n.textContent = msg;
+      n.classList.add('show');
+      setTimeout(() => n.classList.remove('show'), 3000);
+    }
+
+    // --- FUNGSI NAVIGASI (Performa Lancar) ---
+    function setActivePage(pageId) {
+        document.querySelectorAll('.page').forEach(page => {
+            page.classList.remove('active');
+            if (page.id !== pageId) {
+                 page.classList.add('pending-hide');
+            }
+        });
+        
+        const targetPage = document.getElementById(pageId);
+        targetPage.style.display = 'block';
+        targetPage.classList.remove('pending-hide');
+
+        requestAnimationFrame(() => {
+            targetPage.classList.add('active');
+        });
+
+        document.querySelectorAll('.page.pending-hide').forEach(page => {
+             setTimeout(() => {
+                 page.style.display = 'none';
+                 page.classList.remove('pending-hide');
+             }, 400); 
+        });
+    }
+
+    function goToHome() {
+        setActivePage('homePage');
+        showNotif('Kembali ke halaman utama');
+    }
+
+    function goToCatalog() {
+        setActivePage('catalogPage');
+        renderProductList();
+        showNotif('Halaman katalog dibuka');
+    }
+
+    function goToPayment(productId) {
+        const product = PRODUCTS.find(p => p.id === productId);
+        if (!product) {
+            showNotif('Produk tidak ditemukan!');
+            return;
+        }
+        selectedProduct = product;
+        
+        document.getElementById('selectedProduct').textContent = `${product.name} - ${product.price}`;
+        document.getElementById('formProductName').value = product.name;
+        document.getElementById('formProductPrice').value = product.price;
+
+        document.getElementById('proofForm').reset();
+        document.getElementById('imagePreview').innerHTML = '';
+        document.getElementById('fileName').textContent = 'Pilih File Bukti (JPG/PNG)';
+
+
+        setActivePage('paymentPage');
+        showNotif(`Anda memilih: ${product.name}`);
+    }
+
+    // --- FUNGSI KATALOG ---
+    function renderProductList() {
+        const listContainer = document.getElementById('productList');
+        listContainer.innerHTML = ''; 
+
+        PRODUCTS.forEach(product => {
+            const card = document.createElement('div');
+            card.className = 'product-card';
+            card.innerHTML = `
+                <div class="product-info">
+                    <h3>${product.name}</h3>
+                    <p>${product.description}</p>
+                </div>
+                <button class="buy-btn" onclick="goToPayment('${product.id}')">
+                    Beli (${product.price})
+                </button>
+            `;
+            listContainer.appendChild(card);
+        });
+    }
+
+    // --- FUNGSI COPY CLIPBOARD ---
+    function copyToClipboard(text, btn) {
+      const el = document.createElement('textarea');
+      el.value = text;
+      document.body.appendChild(el);
+      el.select();
+      
+      let success = false;
+      try {
+        success = document.execCommand('copy');
+        if (success) {
+          btn.textContent = '✓ Tersalin!';
+          btn.classList.add('copied');
+          showNotif('Nomor berhasil disalin');
+          
+          setTimeout(() => {
+            btn.textContent = 'Salin Nomor';
+            btn.classList.remove('copied');
+          }, 2000);
+        } else {
+          showNotif('Gagal menyalin. Silakan coba salin manual.');
+        }
+      } catch (err) {
+        showNotif('Error saat menyalin. Browser mungkin tidak mendukung.');
+      } finally {
+        document.body.removeChild(el);
+      }
+    }
+
+    // --- QRIS MODAL FUNCTIONS ---
+    function enlargeQRIS() {
+        document.getElementById('qrisModal').classList.add('active');
+        showNotif('QRIS diperbesar. Silakan Scan.');
+    }
+    function closeModal() {
+        document.getElementById('qrisModal').classList.remove('active');
+    }
+    function downloadQRIS() {
+        const link = document.createElement('a');
+        link.href = QRIS_IMAGE_URL;
+        link.download = 'QRIS_Payment_SonnOfficial.png';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        showNotif('✅ QRIS berhasil didownload!');
+        closeModal();
+    }
+    window.onclick = function (e) {
+      const m = document.getElementById('qrisModal');
+      if (e.target === m) closeModal();
+    };
+
+
+    // --- FUNGSI FORM BUKTI TRANSFER ---
+    function previewImage(event) {
+      const file = event.target.files[0];
+      const preview = document.getElementById('imagePreview');
+      const fileNameDisplay = document.getElementById('fileName');
+      
+      preview.innerHTML = '';
+      
+      if (file) {
+        fileNameDisplay.textContent = file.name;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          preview.innerHTML = `<img src="${e.target.result}" class="preview-image" alt="Preview Bukti">`;
+        }
+        reader.readAsDataURL(file);
+      } else {
+        fileNameDisplay.textContent = 'Pilih File Bukti (JPG/PNG)';
+      }
+    }
+
+    function submitProof(event) {
+        event.preventDefault();
+
+        const form = document.getElementById('proofForm');
+        const nama = document.getElementById('nama').value;
+        const metode = document.getElementById('metode').value;
+        const produkName = document.getElementById('formProductName').value;
+        const produkPrice = document.getElementById('formProductPrice').value;
+        const buktiFile = document.getElementById('bukti').files[0];
+
+        if (!nama || !metode || !produkName || !buktiFile) {
+            showNotif('Harap lengkapi Nama, Metode, dan Foto Bukti Transfer!');
+            return;
+        }
+
+        const waMessage = `📋 *KONFIRMASI PEMBAYARAN* 📋\n\n` +
+                          `👤 *Nama:* ${nama}\n` +
+                          `📦 *Produk:* ${produkName}\n` +
+                          `💰 *Harga:* ${produkPrice}\n` +
+                          `💳 *Metode Bayar:* ${metode}\n\n` +
+                          `*(Saya sudah transfer, mohon dicek dan lampirkan foto bukti transfer di chat ini.)*`;
+
+        const waLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(waMessage)}`;
+
+        window.open(waLink, '_blank');
+        
+        showNotif('✅ Formulir dikirim! Silakan konfirmasi di WhatsApp dan kirimkan foto bukti transfer.');
+        
+        form.reset();
+        document.getElementById('imagePreview').innerHTML = '';
+        document.getElementById('fileName').textContent = 'Pilih File Bukti (JPG/PNG)';
+
+        setTimeout(() => {
+            goToCatalog();
+        }, 3000);
+    }
+
+    // --- INISIALISASI ---
+    window.onload = function() {
+        initParticles(); // Inisialisasi efek partikel
+        goToHome(); 
+    };
+  </script>
+</body>
+</html>
